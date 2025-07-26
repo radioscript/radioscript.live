@@ -1,0 +1,52 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  APP_IMAGE_NAME: ${{ secrets.APP_IMAGE_NAME }}
+  APP_PORT: ${{ secrets.APP_PORT }}
+
+  DOCKER_FILE_PATH: apps/radioscript.live/Dockerfile
+  REMOTE_DIR_PATH: /tmp/${{ secrets.APP_IMAGE_NAME }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ env.APP_IMAGE_NAME }} -f ${{ env.DOCKER_FILE_PATH }} .
+
+      - name: Save Docker Image
+        run: |
+          docker save -o ${{ env.APP_IMAGE_NAME }}.tar ${{ env.APP_IMAGE_NAME }}
+          chmod 644 ${{ env.APP_IMAGE_NAME }}.tar
+          ls -l ${{ env.APP_IMAGE_NAME }}.tar
+
+      - name: Set up SSH key and known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H -p "${{ secrets.SSH_PORT }}" "${{ secrets.SERVER_IP }}" >> ~/.ssh/known_hosts
+
+      - name: Copy  Image File to Remote Server
+        run: |
+          ssh -p "${{ secrets.SSH_PORT }}" -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }} "mkdir -p ${{ env.REMOTE_DIR_PATH }}"
+          scp -P ${{ secrets.SSH_PORT }} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ env.APP_IMAGE_NAME }}.tar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }}:${{ env.REMOTE_DIR_PATH }}/${{ env.APP_IMAGE_NAME }}.tar
+
+      - name: SSH to Remote Server and Run Docker Container
+        run: |
+          ssh -i ~/.ssh/id_rsa -p "${{ secrets.SSH_PORT }}" -o StrictHostKeyChecking=no ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }} << 'EOF'
+            docker load -i ${{ env.REMOTE_DIR_PATH }}/${{ env.APP_IMAGE_NAME }}.tar
+            docker stop ${{ env.APP_IMAGE_NAME }} || true
+            docker rm ${{ env.APP_IMAGE_NAME }} || true
+            docker run -d -p ${{ env.APP_PORT }}:${{ env.APP_PORT }} --name ${{ env.APP_IMAGE_NAME }} ${{ env.APP_IMAGE_NAME }} 
+          EOF

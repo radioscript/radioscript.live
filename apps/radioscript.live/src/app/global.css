@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  -webkit-text-size-adjust: 100%;
+  font-family: var(--font-yekan-bakh), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial,
+    Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+
+  scroll-behavior: smooth;
+}
+:root {
+  --font-yekan-bakh: 'yekanBakhFont';
+  --swiper-pagination-color: #10b981;
+  --swiper-pagination-bullet-inactive-color: #999999;
+  --swiper-pagination-bullet-inactive-opacity: 1;
+  --swiper-pagination-bullet-size: 8px;
+  --swiper-pagination-bullet-horizontal-gap: 6px;
+}
+
+@layer utilities {
+  .app-container {
+    @apply container mx-auto px-6;
+  }
+}
+@layer base {
+  *,
+  ::before,
+  ::after {
+    @apply dark:border-zinc-900 border-zinc-200;
+  }
+}
+
+html,
+body,
+body > div:first-child,
+div#__next,
+div#__next > div {
+  min-height: 100%;
+}

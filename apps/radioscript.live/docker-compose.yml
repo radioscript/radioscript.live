@@ -1,0 +1,11 @@
+services:
+  radioscript:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: radioscript-live
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
