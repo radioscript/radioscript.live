@@ -52,7 +52,7 @@ export const usePostStore = create<PostState>((set, get) => ({
   fetchPosts: async (page = 1, limit = 10, search = '') => {
     set({ isLoading: true, error: null });
     try {
-      const url = `${API_BASE_URL_VERSIONED}/post?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`;
+      const url = `${API_BASE_URL_VERSIONED}/posts?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`;
       const response = await fetcher<PostListResponse>(url, { method: 'GET' });
       set({ posts: response.data });
     } catch (err: any) {

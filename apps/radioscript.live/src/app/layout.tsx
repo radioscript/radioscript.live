@@ -1,4 +1,3 @@
-import { ReactAudioPlayer } from '@/components';
 import { StoreProvider, ThemeProviders } from '@/providers';
 import { ToastProvider } from '@heroui/react';
 import localFont from 'next/font/local';
@@ -29,9 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <StoreProvider>
           <ThemeProviders>
             {children}
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-black p-4">
-              <ReactAudioPlayer />
-            </div>
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-black p-4">{/* <ReactAudioPlayer /> */}</div>
           </ThemeProviders>
         </StoreProvider>
         <ToastProvider placement="top-center" />
